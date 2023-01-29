@@ -1,4 +1,6 @@
 import { StyleSheet, Text, View, Button, Image, Animated } from 'react-native';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
 export default function ProfileScreen() {
   return (
@@ -27,6 +29,12 @@ export default function ProfileScreen() {
       <View style={styles.belowBar}>
           <Text>Next Level: Broccoli</Text>
       </View>
+
+      <Button
+        onPress={() => signOut(auth)}
+        title="Sign Out"
+        color="green"
+      />
 
     </View>
     
@@ -87,6 +95,11 @@ const styles = StyleSheet.create({
   belowBar: {
     alignItems: 'flex-end',
     marginRight: 20,
+  },
+
+  button: {
+    fontSize: 24,
+    fontWeight: 'normal',
   },
 
 });

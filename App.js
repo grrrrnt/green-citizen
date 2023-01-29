@@ -1,17 +1,46 @@
 import * as React from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, Button } from 'react-native';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import HomeScreen from './pages/HomeScreen';
 import ChallengesScreen from './pages/ChallengesScreen';
 import CommunityScreen from './pages/CommunityScreen';
 import ProfileScreen from './pages/ProfileScreen';
+import WelcomeScreen from './pages/WelcomeScreen';
+import LogInScreen from './pages/LogInScreen';
+import SignUpScreen from './pages/SignUpScreen';
 
+import { useAuthentication } from './utils/hooks/useAuthentication';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+function AuthStack() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Log In" component={LogInScreen} />
+        <Stack.Screen name="Sign Up" component={SignUpScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function UserStack() {
+  return (
+    <NavigationContainer>
+      {/* <Stack.Navigator> */}
+        <MyTabs />
+      {/* </Stack.Navigator> */}
+    </NavigationContainer>
+  );
+}
 
 function MyTabs() {
   return (
@@ -48,13 +77,9 @@ function MyTabs() {
   );
 }
 
-
 export default function App() {
-  return (
-    <NavigationContainer>
-      <MyTabs />
-    </NavigationContainer>
-  );
+  const { user } = useAuthentication();
+  return user ? <UserStack /> : <AuthStack />;
 }
 
 const styles = StyleSheet.create({
