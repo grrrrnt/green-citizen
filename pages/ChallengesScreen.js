@@ -49,6 +49,20 @@ export default function ChallengesScreen() {
         />        
       </View>
 
+
+      <Text style={styles.title}>Diet</Text>
+      <View style={styles.challengeList}>
+        <ListItem 
+              title="Purchase organic products (20 points)" 
+              secondaryText="Buying organic products protects the environment"
+              
+        />
+       
+      </View>
+
+
+
+
       </ScrollView>
       
 
