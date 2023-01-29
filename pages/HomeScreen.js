@@ -5,7 +5,7 @@ import { Camera } from 'expo-camera'
 import { auth, db, storage } from '../firebaseConfig';
 import { uploadBytesResumable, ref, getDownloadURL } from 'firebase/storage';
 import {useState} from "react";
-import {doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore";
+import {doc, getDoc, updateDoc, arrayUnion, increment} from "firebase/firestore";
 
 const prompts = [
   'Walk or cycle to school/work today.',
@@ -65,7 +65,14 @@ export default function App() {
     updateDoc(docRef, {
       files: arrayUnion(fileName)
     }).then((snapshot) => {
-      console.log('Updated firestore!');
+      console.log('Updated Photos!');
+    });
+
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    updateDoc(userRef, {
+      points: increment(50)
+    }).then((snapshot) => {
+      console.log('Updated User!');
     });
   }
 
