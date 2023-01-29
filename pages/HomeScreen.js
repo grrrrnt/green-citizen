@@ -2,6 +2,20 @@ import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image } from 'react-native'
 import { Camera } from 'expo-camera'
+import { auth, db, storage } from '../firebaseConfig';
+import { uploadBytes, ref } from 'firebase/storage';
+
+const prompts = [
+  'Walk or cycle to school/work today.',
+  'Use a reusable water bottle.',
+  'Eat a plant-based meal.',
+  'Use a reusable bag.',
+  'Encourage a friend to go green.',
+  'Attend a beach cleanup.',
+  'Grow a plant.',
+  'Recycle a plastic bottle.',
+  'Use a reusable straw.',
+];
 
 let camera
 export default function App() {
@@ -14,7 +28,6 @@ export default function App() {
 
   const __startCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync()
-    console.log(status)
     if (status === 'granted') {
       setStartCamera(true)
     } else {
@@ -27,14 +40,48 @@ export default function App() {
     setPreviewVisible(true)
     setCapturedImage(photo)
   }
+
   const __sendPhoto = async () => { 
     setPhotoTaken(true)
+    handleSubmit(photo);
+    const storageRef = ref(storage,  + '_' + Date.now() + '.jpg');
+    uploadBytes(storageRef, photo.uri).then((snapshot) => {
+      console.log('Uploaded a blob or file!');
+    });
   }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const file = e.target[0]?.files[0]
+
+    if (!file) return;
+
+    const storageRef = ref(storage, `files/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on("state_changed",
+      (snapshot) => {
+        const progress =
+          Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        setProgresspercent(progress);
+      },
+      (error) => {
+        alert(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setImgUrl(downloadURL)
+        });
+      }
+    );
+  }
+
   const __retakePicture = () => {
     setCapturedImage(null)
     setPreviewVisible(false)
     __startCamera()
   }
+
   const __handleFlashMode = () => {
     if (flashMode === 'on') {
       setFlashMode('off')
@@ -44,6 +91,7 @@ export default function App() {
       setFlashMode('auto')
     }
   }
+
   const __switchCamera = () => {
     if (cameraType === 'back') {
       setCameraType('front')
@@ -51,6 +99,7 @@ export default function App() {
       setCameraType('back')
     }
   }
+
   return (
     <View style={styles.container}>
       {startCamera ? (
@@ -70,7 +119,7 @@ export default function App() {
                 fontSize: 28
               }}
             >
-              Walk to school!
+              {prompts[Math.floor(Math.random() * prompts.length)]}
             </Text>
             <Image
               style={{
@@ -200,7 +249,7 @@ export default function App() {
                 fontSize: 28
               }}
             >
-              Walk to school!
+              {prompts[Math.floor(Math.random() * prompts.length)]}
             </Text>
           <View
             style={{
@@ -226,10 +275,11 @@ export default function App() {
                 style={{
                   color: '#fff',
                   fontWeight: 'bold',
+                  fontSize: 16,
                   textAlign: 'center'
                 }}
               >
-                Take picture
+                Take a picture
               </Text>
             </TouchableOpacity>
           </View>
@@ -257,7 +307,6 @@ const styles = StyleSheet.create({
 })
 
 const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
-  console.log('sdsfds', photo)
   return (
     <View
       style={{
@@ -303,7 +352,7 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
                   fontSize: 20
                 }}
               >
-                Re-take
+                Retake
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -311,7 +360,6 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
               style={{
                 width: 130,
                 height: 40,
-
                 alignItems: 'center',
                 borderRadius: 4
               }}
@@ -322,7 +370,7 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
                   fontSize: 20
                 }}
               >
-                Send
+                Upload
               </Text>
             </TouchableOpacity>
           </View>
