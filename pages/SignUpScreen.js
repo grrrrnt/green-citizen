@@ -32,7 +32,6 @@ export default function SignUpScreen({ navigation, route }) {
         name: value.name,
         email: value.email,
         neighborhood: value.neighborhood,
-        level: 1,
         points: 0,
         uid: uid,
       });
