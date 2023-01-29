@@ -2,6 +2,22 @@ import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image } from 'react-native'
 import { Camera } from 'expo-camera'
+import { auth, db, storage } from '../firebaseConfig';
+import { uploadBytesResumable, ref, getDownloadURL } from 'firebase/storage';
+import {useState} from "react";
+import {doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore";
+
+const prompts = [
+  'Walk or cycle to school/work today.',
+  'Use a reusable water bottle.',
+  'Eat a plant-based meal.',
+  'Use a reusable bag.',
+  'Encourage a friend to go green.',
+  'Attend a beach cleanup.',
+  'Grow a plant.',
+  'Recycle a plastic bottle.',
+  'Use a reusable straw.',
+];
 
 let camera
 export default function App() {
@@ -11,10 +27,17 @@ export default function App() {
   const [cameraType, setCameraType] = React.useState(Camera.Constants.Type.back)
   const [flashMode, setFlashMode] = React.useState('off')
   const [photoTaken, setPhotoTaken] = React.useState(false)
+  const [neighborhood, setNeighborhood] = useState(null)
+
+  const docRef = doc(db, "users", auth.currentUser.uid);
+  getDoc(docRef).then((docSnap)  => {
+    if (docSnap.exists()) {
+      setNeighborhood(docSnap.data().neighborhood);
+    }
+  })
 
   const __startCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync()
-    console.log(status)
     if (status === 'granted') {
       setStartCamera(true)
     } else {
@@ -27,14 +50,31 @@ export default function App() {
     setPreviewVisible(true)
     setCapturedImage(photo)
   }
+
   const __sendPhoto = async () => { 
-    setPhotoTaken(true)
+    setPhotoTaken(true);
+    const fileName = auth.currentUser.uid + '_' + Date.now() + '.jpg';
+    const storageRef = ref(storage, fileName);
+    const file = await fetch(capturedImage.uri);
+    const bytes = await file.blob();
+    uploadBytesResumable(storageRef, bytes).then((snapshot) => {
+      console.log('Uploaded a blob or file!');
+    });
+
+    const docRef = doc(db, "photos", neighborhood);
+    updateDoc(docRef, {
+      files: arrayUnion(fileName)
+    }).then((snapshot) => {
+      console.log('Updated firestore!');
+    });
   }
+
   const __retakePicture = () => {
     setCapturedImage(null)
     setPreviewVisible(false)
     __startCamera()
   }
+
   const __handleFlashMode = () => {
     if (flashMode === 'on') {
       setFlashMode('off')
@@ -44,6 +84,7 @@ export default function App() {
       setFlashMode('auto')
     }
   }
+
   const __switchCamera = () => {
     if (cameraType === 'back') {
       setCameraType('front')
@@ -51,6 +92,44 @@ export default function App() {
       setCameraType('back')
     }
   }
+
+  const NeighborhoodFeed = () => {
+    // const [files, setFiles] = useState([]);
+    // var docRef = doc(db, "photos", neighborhood);
+    // getDoc(docRef).then((docSnap)  => {
+    //   if (docSnap.exists()) {
+    //     setFiles(docSnap.data().files);
+    //   }
+    // })
+
+    // const [images, setImages] = useState([]);
+
+    // for (var i = 0; i < files.length; i++) {
+    //   var fileName = files[i];
+    //   const imageRef = ref(storage, fileName);
+    //   getDownloadURL(imageRef)
+    //     .then((url) => {
+    //       setImages([...images, url]);
+    //     })
+    //     .catch((e) => console.log('getting download URL of image:', e));
+    // }
+
+    return (
+      <View>
+        <Text style={{
+          color: 'black',
+          textAlign: 'center',
+          marginTop: 20,
+          fontSize: 16
+        }}
+        >Here's what's going on in {neighborhood}:</Text>
+        {/* {images.map((url) => <Image
+            source={{uri: url}}
+          />)} */}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {startCamera ? (
@@ -62,6 +141,7 @@ export default function App() {
               alignItems: 'center'
             }}
           >
+            <Text style={{ textAlign: 'center'}}>Your task for today is:</Text>
             <Text
               style={{
                 color: 'black',
@@ -70,7 +150,7 @@ export default function App() {
                 fontSize: 28
               }}
             >
-              Walk to school!
+              {prompts[Math.floor(Math.random() * prompts.length)]}
             </Text>
             <Image
               style={{
@@ -79,6 +159,10 @@ export default function App() {
               }}
               source={{uri:capturedImage.uri}}
             />
+            {neighborhood != null
+            ? <NeighborhoodFeed />
+            : <View></View>
+          }
           </View>
         ) : (
             <View
@@ -192,6 +276,7 @@ export default function App() {
             backgroundColor: '#fff'
           }}
         >
+          <Text style={{ textAlign: 'center'}}>Your task for today is:</Text>
           <Text
               style={{
                 color: 'black',
@@ -200,11 +285,11 @@ export default function App() {
                 fontSize: 28
               }}
             >
-              Walk to school!
+              {prompts[Math.floor(Math.random() * prompts.length)]}
             </Text>
           <View
             style={{
-              flex: 1,
+              // flex: 1,
               backgroundColor: '#fff',
               justifyContent: 'center',
               alignItems: 'center'
@@ -219,6 +304,7 @@ export default function App() {
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
+                marginTop: 10,
                 height: 40
               }}
             >
@@ -226,13 +312,18 @@ export default function App() {
                 style={{
                   color: '#fff',
                   fontWeight: 'bold',
+                  fontSize: 16,
                   textAlign: 'center'
                 }}
               >
-                Take picture
+                Take a picture
               </Text>
             </TouchableOpacity>
           </View>
+          {neighborhood != null
+            ? <NeighborhoodFeed />
+            : <View></View>
+          }
         </View>
       )}
 
@@ -257,7 +348,6 @@ const styles = StyleSheet.create({
 })
 
 const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
-  console.log('sdsfds', photo)
   return (
     <View
       style={{
@@ -303,7 +393,7 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
                   fontSize: 20
                 }}
               >
-                Re-take
+                Retake
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -311,7 +401,6 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
               style={{
                 width: 130,
                 height: 40,
-
                 alignItems: 'center',
                 borderRadius: 4
               }}
@@ -322,7 +411,7 @@ const CameraPreview = ({ photo, retakePicture, sendPhoto }) => {
                   fontSize: 20
                 }}
               >
-                Send
+                Upload
               </Text>
             </TouchableOpacity>
           </View>

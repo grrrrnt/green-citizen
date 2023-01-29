@@ -54,10 +54,10 @@ function MyTabs() {
             ? 'ios-home'
             : 'ios-home';
         } else if (route.name === 'Challenges') {
-          iconName = focused ? 'ios-trophy' : 'ios-trophy';
+          iconName = focused ? 'ios-flash' : 'ios-flash';
         }
-        else if (route.name === 'Community') {
-          iconName = focused ? 'ios-people' : 'ios-people';
+        else if (route.name === 'Leaderboard') {
+          iconName = focused ? 'ios-trophy' : 'ios-trophy';
         }
         else if (route.name === 'Profile') {
           iconName = focused ? 'ios-person' : 'ios-person';
@@ -71,7 +71,7 @@ function MyTabs() {
     })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Challenges" component={ChallengesScreen} />
-      <Tab.Screen name="Community" component={CommunityScreen}/>
+      <Tab.Screen name="Leaderboard" component={CommunityScreen}/>
       <Tab.Screen name="Profile" component={ProfileScreen}/>
     </Tab.Navigator>
   );
