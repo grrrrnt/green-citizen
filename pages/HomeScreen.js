@@ -54,6 +54,7 @@ export default function App() {
   const __sendPhoto = async () => { 
     setPhotoTaken(true);
     const storageRef = ref(storage, neighborhood + '/' + auth.currentUser.uid + '_' + Date.now() + '.jpg');
+    console.log(capturedImage.uri)
     const file = await fetch(capturedImage.uri);
     const bytes = await file.blob();
     uploadBytesResumable(storageRef, bytes).then((snapshot) => {
