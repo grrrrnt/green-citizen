@@ -29,45 +29,42 @@ const docSnap = getDoc(docRef).then((docSnap)  => {
 });
 
 const levelList = [
-  { id: 0, level: 1, name: "Potato", img: "../assets/potato2.png", nextLvl: "Broccoli"},
-  { id: 1, level: 2, name: "Broccoli", img: "../assets/potato2.png", nextLvl: "Broccoli"},
-  { id: 2, level: 3, name: "Bell Pepper", img: "../assets/potato2.png", nextLvl: "Broccoli"},
-  { id: 3, level: 4, name: "Carrot", img: "../assets/potato2.png", nextLvl: "Broccoli"},
-
-  
-
-
+  { id: 0, level: 1, name: "Potato", img: require("../assets/potato2.png"), nextLvl: "Broccoli"},
+  { id: 1, level: 2, name: "Broccoli", img: require("../assets/broccoli.png"), nextLvl: "Bell Pepper"},
+  { id: 2, level: 3, name: "Bell Pepper", img: require("../assets/pepper.png"), nextLvl: "Carrot"},
+  { id: 3, level: 4, name: "Carrot", img: require("../assets/carrot.png"), nextLvl: "All done"},
 ];
 var x = level - 1;
+var imgName = levelList[x]?.img
 
-console.log(levelList[0].name);
+
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.profileContainer}>
       <Image
         style={styles.vegetableImage}
-        source={require('../assets/potato2.png')}>
+        source={imgName}>
       </Image>
       <Text
         style={styles.profileName}>{name}</Text>
       <Text
-        style={styles.profileLevel}>Level {level}: {levelList[0].name}</Text>  
+        style={styles.profileLevel}>Level {level}: {levelList[x]?.name}</Text>  
       <Text
         style={styles.profileLevel}>Your Neighborhood: {neighborhood}</Text>
       
       </View>
       <View style={styles.aboveBar}>
           <Text>Your Progress:</Text>
-          <Text>Green Points: {points / (level+x)}/100</Text>
+          <Text>Green Points: {points % 100}/100</Text>
       </View>
       <View style={styles.container}>
 
       <View style={styles.progressBar}>
-        <Animated.View style={[StyleSheet.absoluteFill, styles.progressBarFill, {width: points / (level+x) +'%'}]}/> 
+        <Animated.View style={[StyleSheet.absoluteFill, styles.progressBarFill, {width: points % 100 +'%'}]}/> 
        </View>
       </View>
       <View style={styles.belowBar}>
-          <Text>Next Level: {levelList[0].nextLvl}</Text>
+          <Text>Next Level: {levelList[x]?.nextLvl}</Text>
       </View>
 
       <Button
