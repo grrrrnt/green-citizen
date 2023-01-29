@@ -6,7 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { auth, db } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 const neighborhoods = [
   'College Hill',
@@ -40,25 +40,17 @@ export default function SignUpScreen({ navigation, route }) {
     } catch (e) {
       console.error("Error adding document: ", e);
     }
-    
   }
 
   async function signUp() {
-     try {
-      await createUserWithEmailAndPassword(auth, value.email, value.password)
-        .then(async (userCredential) => {
-          // Signed in 
+    try {
+      createUserWithEmailAndPassword(auth, value.email, value.password)
+      .then(async (userCredential) => {
+          // console.log(userCredential)
           const user = userCredential.user;
           const uid = user.uid;
-
-          // Add user to database
           await addUserToDatabase(uid);
         })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // ..
-        });
       // navigation.navigate('Sign In');
     } catch (error) {
       console.log(error);

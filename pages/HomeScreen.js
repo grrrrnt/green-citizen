@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image } from 'react-native'
 import { Camera } from 'expo-camera'
-import MediaLibrary from 'expo-media-library'
+
 let camera
 export default function App() {
   const [startCamera, setStartCamera] = React.useState(false)
