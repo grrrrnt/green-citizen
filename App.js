@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -43,7 +44,31 @@ function UserStack() {
 
 function MyTabs() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName;
+
+        if (route.name === 'Home') {
+          iconName = focused
+            ? 'ios-home'
+            : 'ios-home';
+        } else if (route.name === 'Challenges') {
+          iconName = focused ? 'ios-trophy' : 'ios-trophy';
+        }
+        else if (route.name === 'Community') {
+          iconName = focused ? 'ios-people' : 'ios-people';
+        }
+        else if (route.name === 'Profile') {
+          iconName = focused ? 'ios-person' : 'ios-person';
+        }
+
+        // You can return any component that you like here!
+        return <Ionicons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: 'green',
+      tabBarInactiveTintColor: 'gray',
+    })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Challenges" component={ChallengesScreen} />
       <Tab.Screen name="Community" component={CommunityScreen}/>
