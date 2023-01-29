@@ -18,7 +18,7 @@ export default function ProfileScreen() {
       </View>
       <View style={styles.aboveBar}>
           <Text>Your Progress:</Text>
-          <Text>10%</Text>
+          <Text>Green Points: 10/100</Text>
       </View>
       <View style={styles.container}>
 
