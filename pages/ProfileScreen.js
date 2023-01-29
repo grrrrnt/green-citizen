@@ -1,8 +1,31 @@
 import { StyleSheet, Text, View, Button, Image, Animated } from 'react-native';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+import {useState} from "react";
+import {doc, getDoc} from "firebase/firestore";
 
 export default function ProfileScreen() {
+
+const [name, setName] = useState(null)
+const [level, setLevel] = useState(null)
+const [neighborhood, setNeighborhood] = useState(null)
+const [points, setPoints] = useState(null)
+
+const docRef = doc(db, "users", auth.currentUser.uid);
+const docSnap = getDoc(docRef).then((docSnap)  => {
+  if(docSnap.exists()){
+    console.log(docSnap.data())
+    setName(docSnap.data().name);
+    setLevel(docSnap.data().level);
+    setNeighborhood(docSnap.data().neighborhood);
+    setPoints(docSnap.data().points);
+
+
+    console.log(points);
+  }
+});
+
+
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.profileContainer}>
@@ -11,14 +34,16 @@ export default function ProfileScreen() {
         source={require('../assets/potato2.png')}>
       </Image>
       <Text
-        style={styles.profileName}>Test User</Text>
+        style={styles.profileName}>{name}</Text>
       <Text
-        style={styles.profileLevel}>Level 1: Potato</Text>  
+        style={styles.profileLevel}>Level {level}: Potato</Text>  
+      <Text
+        style={styles.profileLevel}>Your Neighborhood: {neighborhood}</Text>
       
       </View>
       <View style={styles.aboveBar}>
           <Text>Your Progress:</Text>
-          <Text>Green Points: 10/100</Text>
+          <Text>Green Points: {points}/100</Text>
       </View>
       <View style={styles.container}>
 
