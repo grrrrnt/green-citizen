@@ -3,9 +3,9 @@ import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image } from 'react-native'
 import { Camera } from 'expo-camera'
 import { auth, db, storage } from '../firebaseConfig';
-import { uploadBytesResumable, ref } from 'firebase/storage';
+import { uploadBytesResumable, ref, getDownloadURL } from 'firebase/storage';
 import {useState} from "react";
-import {doc, getDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore";
 
 const prompts = [
   'Walk or cycle to school/work today.',
@@ -30,7 +30,7 @@ export default function App() {
   const [neighborhood, setNeighborhood] = useState(null)
 
   const docRef = doc(db, "users", auth.currentUser.uid);
-  const docSnap = getDoc(docRef).then((docSnap)  => {
+  getDoc(docRef).then((docSnap)  => {
     if (docSnap.exists()) {
       setNeighborhood(docSnap.data().neighborhood);
     }
@@ -53,11 +53,19 @@ export default function App() {
 
   const __sendPhoto = async () => { 
     setPhotoTaken(true);
-    const storageRef = ref(storage, neighborhood + '/' + auth.currentUser.uid + '_' + Date.now() + '.jpg');
+    const fileName = auth.currentUser.uid + '_' + Date.now() + '.jpg';
+    const storageRef = ref(storage, fileName);
     const file = await fetch(capturedImage.uri);
     const bytes = await file.blob();
     uploadBytesResumable(storageRef, bytes).then((snapshot) => {
       console.log('Uploaded a blob or file!');
+    });
+
+    const docRef = doc(db, "photos", neighborhood);
+    updateDoc(docRef, {
+      files: arrayUnion(fileName)
+    }).then((snapshot) => {
+      console.log('Updated firestore!');
     });
   }
 
@@ -85,6 +93,43 @@ export default function App() {
     }
   }
 
+  const NeighborhoodFeed = () => {
+    // const [files, setFiles] = useState([]);
+    // var docRef = doc(db, "photos", neighborhood);
+    // getDoc(docRef).then((docSnap)  => {
+    //   if (docSnap.exists()) {
+    //     setFiles(docSnap.data().files);
+    //   }
+    // })
+
+    // const [images, setImages] = useState([]);
+
+    // for (var i = 0; i < files.length; i++) {
+    //   var fileName = files[i];
+    //   const imageRef = ref(storage, fileName);
+    //   getDownloadURL(imageRef)
+    //     .then((url) => {
+    //       setImages([...images, url]);
+    //     })
+    //     .catch((e) => console.log('getting download URL of image:', e));
+    // }
+
+    return (
+      <View>
+        <Text style={{
+          color: 'black',
+          textAlign: 'center',
+          marginTop: 20,
+          fontSize: 16
+        }}
+        >Here's what's going on in {neighborhood}:</Text>
+        {/* {images.map((url) => <Image
+            source={{uri: url}}
+          />)} */}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {startCamera ? (
@@ -96,6 +141,7 @@ export default function App() {
               alignItems: 'center'
             }}
           >
+            <Text style={{ textAlign: 'center'}}>Your task for today is:</Text>
             <Text
               style={{
                 color: 'black',
@@ -113,6 +159,10 @@ export default function App() {
               }}
               source={{uri:capturedImage.uri}}
             />
+            {neighborhood != null
+            ? <NeighborhoodFeed />
+            : <View></View>
+          }
           </View>
         ) : (
             <View
@@ -226,6 +276,7 @@ export default function App() {
             backgroundColor: '#fff'
           }}
         >
+          <Text style={{ textAlign: 'center'}}>Your task for today is:</Text>
           <Text
               style={{
                 color: 'black',
@@ -238,7 +289,7 @@ export default function App() {
             </Text>
           <View
             style={{
-              flex: 1,
+              // flex: 1,
               backgroundColor: '#fff',
               justifyContent: 'center',
               alignItems: 'center'
@@ -253,6 +304,7 @@ export default function App() {
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
+                marginTop: 10,
                 height: 40
               }}
             >
@@ -268,6 +320,10 @@ export default function App() {
               </Text>
             </TouchableOpacity>
           </View>
+          {neighborhood != null
+            ? <NeighborhoodFeed />
+            : <View></View>
+          }
         </View>
       )}
 
