@@ -1,12 +1,24 @@
 import { StyleSheet, Text, View, Button } from 'react-native';
+import { ListItem } from "@react-native-material/core";
+
+
 
 export default function ChallengesScreen() {
   return (
-    <View style={{ flex: 1}}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>More ways to be green</Text>
+    <View style={{ flex: 1, backgroundColor: 'white'}}>
+      <View style={styles.challengeContainer}>
+        <Text style={styles.title}>Transportation</Text>
+      <>
+        <ListItem title="List Item" />
+        <ListItem title="List Item" />
+        <ListItem title="List Item" />
+      </>
+
+
+
       </View>
-      
+
+
     </View>
   );
 }
@@ -14,10 +26,10 @@ export default function ChallengesScreen() {
 
 const styles = StyleSheet.create({
 
-  titleContainer: {
+  challengeContainer: {
 
     marginTop: 75,
-    alignItems: 'center',
+    marginLeft: 20,
 
   },
   title: {

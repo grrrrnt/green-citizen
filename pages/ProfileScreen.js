@@ -4,7 +4,7 @@ import { auth } from '../firebaseConfig';
 
 export default function ProfileScreen() {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.profileContainer}>
       <Image
         style={styles.vegetableImage}
