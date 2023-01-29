@@ -3,7 +3,9 @@ import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image } from 'react-native'
 import { Camera } from 'expo-camera'
 import { auth, db, storage } from '../firebaseConfig';
-import { uploadBytes, ref } from 'firebase/storage';
+import { uploadBytesResumable, ref } from 'firebase/storage';
+import {useState} from "react";
+import {doc, getDoc} from "firebase/firestore";
 
 const prompts = [
   'Walk or cycle to school/work today.',
@@ -25,6 +27,14 @@ export default function App() {
   const [cameraType, setCameraType] = React.useState(Camera.Constants.Type.back)
   const [flashMode, setFlashMode] = React.useState('off')
   const [photoTaken, setPhotoTaken] = React.useState(false)
+  const [neighborhood, setNeighborhood] = useState(null)
+
+  const docRef = doc(db, "users", auth.currentUser.uid);
+  const docSnap = getDoc(docRef).then((docSnap)  => {
+    if (docSnap.exists()) {
+      setNeighborhood(docSnap.data().neighborhood);
+    }
+  })
 
   const __startCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync()
@@ -42,38 +52,13 @@ export default function App() {
   }
 
   const __sendPhoto = async () => { 
-    setPhotoTaken(true)
-    handleSubmit(photo);
-    const storageRef = ref(storage,  + '_' + Date.now() + '.jpg');
-    uploadBytes(storageRef, photo.uri).then((snapshot) => {
+    setPhotoTaken(true);
+    const storageRef = ref(storage, neighborhood + '/' + auth.currentUser.uid + '_' + Date.now() + '.jpg');
+    const file = await fetch(capturedImage.uri);
+    const bytes = await file.blob();
+    uploadBytesResumable(storageRef, bytes).then((snapshot) => {
       console.log('Uploaded a blob or file!');
     });
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const file = e.target[0]?.files[0]
-
-    if (!file) return;
-
-    const storageRef = ref(storage, `files/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on("state_changed",
-      (snapshot) => {
-        const progress =
-          Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        setProgresspercent(progress);
-      },
-      (error) => {
-        alert(error);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setImgUrl(downloadURL)
-        });
-      }
-    );
   }
 
   const __retakePicture = () => {

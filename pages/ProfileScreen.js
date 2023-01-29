@@ -11,8 +11,6 @@ const [level, setLevel] = useState(null)
 const [neighborhood, setNeighborhood] = useState(null)
 const [points, setPoints] = useState(null)
 
-
-
 const docRef = doc(db, "users", auth.currentUser.uid);
 const docSnap = getDoc(docRef).then((docSnap)  => {
   if(docSnap.exists()){
@@ -21,10 +19,6 @@ const docSnap = getDoc(docRef).then((docSnap)  => {
     setNeighborhood(docSnap.data().neighborhood);
     setPoints(docSnap.data().points);
     setLevel(Math.floor(points/100+1));
-
-
-
-
   }
 });
 
