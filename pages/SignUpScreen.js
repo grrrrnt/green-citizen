@@ -6,7 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { auth, db } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 const neighborhoods = [
   'College Hill',
@@ -28,7 +28,7 @@ export default function SignUpScreen({ navigation, route }) {
 
   async function addUserToDatabase(uid) {
     try {
-      const docRef = await addDoc(collection(db, "users"), {
+      await setDoc(doc(db, "users", uid), {
         name: value.name,
         email: value.email,
         neighborhood: value.neighborhood,
@@ -36,7 +36,6 @@ export default function SignUpScreen({ navigation, route }) {
         points: 0,
         uid: uid,
       });
-      console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
