@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Animated } from 'react-native';
 
 export default function ProfileScreen() {
   return (
@@ -16,20 +16,28 @@ export default function ProfileScreen() {
       </View>
       <View style={styles.aboveBar}>
           <Text>Your Progress:</Text>
-          <Text>0%</Text>
+          <Text>10%</Text>
       </View>
       <View style={styles.container}>
-      <View style={styles.progressBar}></View>
+
+      <View style={styles.progressBar}>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.progressBarFill]}/> 
+       </View>
       </View>
       <View style={styles.belowBar}>
           <Text>Next Level: Broccoli</Text>
       </View>
+
     </View>
     
   );
 }
 
 const styles = StyleSheet.create({
+  progressBarFill: {
+    backgroundColor: 'green',
+    width: '10%'
+  },
 
   profileContainer: {
     justifyContent: 'center',
@@ -67,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   progressBar: {
-    height: 20,
+    height: 30,
     width: '90%',
     backgroundColor: 'white',
     alignItems: 'center',
@@ -80,4 +88,5 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginRight: 20,
   },
+
 });
